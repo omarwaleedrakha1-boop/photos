@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة إزالة العلامات المائية الذكية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0e12;
+            --card-bg: #16181f;
+            --card-border: #232631;
+            --accent-color: #ff3b30;
+            --accent-hover: #e03126;
+            --text-main: #ffffff;
+            --text-muted: #8a8d9b;
+            --radius-lg: 16px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 15px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff 0%, #8a8d9b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Upload Area */
+        .upload-zone {
+            border: 2px dashed var(--card-border);
+            border-radius: var(--radius-sm);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent-color);
+            background: rgba(255, 59, 48, 0.03);
+        }
+
+        .upload-zone p {
+            color: var(--text-muted);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Canvas Workspace */
+        .workspace {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            max-width: 100%;
+            overflow: auto;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--card-border);
+            background: #000;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            cursor: crosshair;
+        }
+
+        /* Controls Toolbar */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 15px;
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: var(--radius-sm);
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        input[type="range"] {
+            accent-color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--card-border);
+            color: var(--text-main);
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-success {
+            background: #34c759;
+        }
+
+        .loading {
+            display: none;
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>مزيل العلامات المائية الذكي</h1>
+        <p>قم برفع صورتك، حدد المساحة بالفرشاة، وازِل العلامة المائية بسهولة</p>
+    </header>
+
+    <div class="main-container">
+        <!-- منطقة الرفع -->
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+            <svg width="48" height="48" fill="none" stroke="#8a8d9b" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p>اضغط هنا لرفع الصورة أو اسحبها إلى هنا</p>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <!-- منطقة العمل -->
+        <div class="workspace" id="workspace">
+            <div class="toolbar">
+                <div class="tool-group">
+                    <label for="brush-size">حجم الفرشاة:</label>
+                    <input type="range" id="brush-size" min="5" max="50" value="20">
+                </div>
+                <div class="tool-group">
+                    <button class="btn" id="reset-btn">تراجع / إعادة</button>
+                    <button class="btn btn-primary" id="process-btn">إزالة العلامة المائية</button>
+                    <button class="btn btn-success" id="download-btn" style="display:none;">تحميل الصورة</button>
+                </div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="image-canvas"></canvas>
+            </div>
+            
+            <div class="loading" id="loading-text">جاري معالجة الصورة وإخفاء العلامة المائية...</div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const uploadZone = document.getElementById('upload-zone');
+        const workspace = document.getElementById('workspace');
+        const canvas = document.getElementById('image-canvas');
+        const ctx = canvas.getContext('2d');
+        const brushSizeInput = document.getElementById('brush-size');
+        const processBtn = document.getElementById('process-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const loadingText = document.getElementById('loading-text');
+
+        let originalImage = null;
+        let isDrawing = false;
+        let maskCanvas = document.createElement('canvas');
+        let maskCtx = maskCanvas.getContext('2d');
+
+        // تحميل الصورة
+        fileInput.addEventListener('change', handleImageUpload);
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                originalImage = new Image();
+                originalImage.onload = () => {
+                    initCanvas();
+                    uploadZone.style.display = 'none';
+                    workspace.style.display = 'flex';
+                };
+                originalImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function initCanvas() {
+            // ضبط الأبعاد
+            const maxWidth = 800;
+            let width = originalImage.width;
+            let height = originalImage.height;
+
+            if (width > maxWidth) {
+                height = (maxWidth / width) * height;
+                width = maxWidth;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            maskCanvas.width = width;
+            maskCanvas.height = height;
+
+            resetCanvas();
+        }
+
+        function resetCanvas() {
+            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+            downloadBtn.style.display = 'none';
+        }
+
+        // رسم التحديد بالفرشاة
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const radius = brushSizeInput.value;
+
+            // رسم التحديد أحمر شفاف للمستخدم
+            ctx.fillStyle = 'rgba(255, 59, 48, 0.4)';
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // رسم القناع الفعلي خلف الكواليس
+            maskCtx.fillStyle = '#ffffff';
+            maskCtx.beginPath();
+            maskCtx.arc(x, y, radius, 0, Math.PI * 2);
+            maskCtx.fill();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        resetBtn.addEventListener('click', resetCanvas);
+
+        // خوارزمية إزالة العلامة المائية (Fast Inpainting Algorithm)
+        processBtn.addEventListener('click', () => {
+            loadingText.style.display = 'block';
+            
+            setTimeout(() => {
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const maskData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+                
+                const w = canvas.width;
+                const h = canvas.height;
+                const data = imgData.data;
+                const mask = maskData.data;
+
+                // إجراء عملية انتشار للبكسلات (Diffusion Pass) لملء المنطقة المحددة
+                const passes = 35; 
+                for (let pass = 0; pass < passes; pass++) {
+                    for (let y = 1; y < h - 1; y++) {
+                        for (let x = 1; x < w - 1; x++) {
+                            const idx = (y * w + x) * 4;
+
+                            // إذا كانت المنطقة محددة بقناع
+                            if (mask[idx] > 100) {
+                                let r = 0, g = 0, b = 0, count = 0;
+
+                                // أخذ متوسط الألوان من البكسلات المجاورة
+                                const neighbors = [
+                                    ((y - 1) * w + x) * 4,
+                                    ((y + 1) * w + x) * 4,
+                                    (y * w + (x - 1)) * 4,
+                                    (y * w + (x + 1)) * 4
+                                ];
+
+                                neighbors.forEach(nIdx => {
+                                    r += data[nIdx];
+                                    g += data[nIdx + 1];
+                                    b += data[nIdx + 2];
+                                    count++;
+                                });
+
+                                data[idx] = r / count;
+                                data[idx + 1] = g / count;
+                                data[idx + 2] = b / count;
+                            }
+                        }
+                    }
+                }
+
+                ctx.putImageData(imgData, 0, 0);
+                loadingText.style.display = 'none';
+                downloadBtn.style.display = 'inline-block';
+            }, 100);
+        });
+
+        // تنزيل الصورة
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'clean-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    </script>
+</body>
+</html>
